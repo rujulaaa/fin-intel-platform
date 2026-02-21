@@ -1,0 +1,15 @@
+# Data & APIs
+yfinance
+pandas
+numpy
+requests
+beautifulsoup4
+
+# Machine Learning
+torch
+transformers
+scikit-learn
+
+# Visualization & Deployment
+streamlit
+plotly
