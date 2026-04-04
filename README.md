@@ -1,10 +1,10 @@
-# 📊 FintelliQ – Financial Intelligence Platform
+# Financial Intelligence Platform
 
 > End-to-end market intelligence: real-time data ingestion, FinBERT sentiment analysis, risk heatmaps, and volatility forecasts.
 
 ---
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 fintelliq/
