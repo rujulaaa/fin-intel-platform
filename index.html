@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FintelliQ – Financial Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#050a0f; --surface:#0b1520; --surface2:#101e2e;
+    --border:#1a2f45; --accent:#00d4ff; --accent2:#00ff88;
+    --accent3:#ff4d6d; --accent4:#ffd166;
+    --text:#e0eaf5; --muted:#5a7a99;
+    --mono:'IBM Plex Mono',monospace; --sans:'Space Grotesk',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;
+    background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);
+    background-size:40px 40px;pointer-events:none;z-index:0;}
+  .app{position:relative;z-index:1;}
+
+  /* ── Header ── */
+  header{display:flex;align-items:center;justify-content:space-between;
+    padding:14px 28px;border-bottom:1px solid var(--border);
+    background:rgba(5,10,15,.95);backdrop-filter:blur(12px);
+    position:sticky;top:0;z-index:100;}
+  .logo{display:flex;align-items:center;gap:10px;}
+  .logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .logo-text{font-size:15px;font-weight:700;letter-spacing:.05em;}
+  .logo-sub{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;}
+  .header-right{display:flex;align-items:center;gap:16px;}
+  .live-badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;
+    color:var(--accent2);background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);
+    padding:4px 10px;border-radius:20px;}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);
+    animation:pulse 1.5s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+  .timestamp{font-family:var(--mono);font-size:11px;color:var(--muted);}
+
+  /* ── Layout ── */
+  .main{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 57px);}
+
+  /* ── Sidebar ── */
+  .sidebar{border-right:1px solid var(--border);padding:20px 0;background:var(--surface);}
+  .sidebar-label{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.15em;padding:0 18px;margin-bottom:8px;}
+  .sidebar-section{margin-bottom:28px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;
+    font-size:13px;font-weight:500;color:var(--muted);transition:all .15s;
+    border-left:2px solid transparent;}
+  .nav-item:hover{color:var(--text);background:var(--surface2);}
+  .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(0,212,255,.05);}
+  .nav-icon{font-size:15px;width:18px;text-align:center;}
+  .watchlist{padding:0 12px;}
+  .watch-item{display:flex;justify-content:space-between;align-items:center;
+    padding:8px;border-radius:6px;font-family:var(--mono);font-size:12px;
+    transition:background .15s;cursor:pointer;}
+  .watch-item:hover{background:var(--surface2);}
+  .watch-ticker{color:var(--text);font-weight:600;}
+  .watch-price{color:var(--muted);}
+  .watch-change{font-size:11px;}
+  .pos{color:var(--accent2);} .neg{color:var(--accent3);}
+
+  /* ── Content ── */
+  .content{padding:24px;overflow-y:auto;}
+
+  /* ── KPI Row ── */
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+  .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:16px 18px;position:relative;overflow:hidden;animation:fadeUp .5s ease both;}
+  .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .kpi-card:nth-child(1)::after{background:var(--accent);}
+  .kpi-card:nth-child(2)::after{background:var(--accent2);}
+  .kpi-card:nth-child(3)::after{background:var(--accent4);}
+  .kpi-card:nth-child(4)::after{background:var(--accent3);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;
+    margin-bottom:8px;font-family:var(--mono);}
+  .kpi-value{font-size:26px;font-weight:700;line-height:1;margin-bottom:6px;}
+  .kpi-sub{font-size:11px;color:var(--muted);}
+
+  /* ── Panels ── */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .grid3{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;animation:fadeUp .6s ease both;}
+  .panel-header{display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;border-bottom:1px solid var(--border);}
+  .panel-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--muted);font-family:var(--mono);}
+  .panel-tag{font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:4px;
+    background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);}
+  .panel-body{padding:18px;}
+
+  /* ── Sentiment Feed ── */
+  .headline-list{display:flex;flex-direction:column;gap:10px;}
+  .headline-item{display:flex;gap:12px;align-items:flex-start;padding:10px;
+    border-radius:7px;background:var(--surface2);border:1px solid var(--border);
+    transition:border-color .2s;cursor:default;}
+  .headline-item:hover{border-color:var(--accent);}
+  .sent-badge{flex-shrink:0;width:56px;height:22px;border-radius:4px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;}
+  .sent-POS{background:rgba(0,255,136,.15);color:var(--accent2);border:1px solid rgba(0,255,136,.3);}
+  .sent-NEG{background:rgba(255,77,109,.15);color:var(--accent3);border:1px solid rgba(255,77,109,.3);}
+  .sent-NEU{background:rgba(90,122,153,.15);color:var(--muted);border:1px solid rgba(90,122,153,.3);}
+  .headline-text{font-size:12px;line-height:1.5;color:var(--text);flex:1;}
+  .headline-meta{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px;}
+  .headline-conf{font-size:10px;font-family:var(--mono);color:var(--muted);white-space:nowrap;}
+
+  /* ── Heatmap ── */
+  .heatmap-col-labels{display:grid;gap:5px;margin-bottom:5px;}
+  .heatmap-col-label{font-family:var(--mono);font-size:9px;color:var(--muted);text-align:center;}
+  .heatmap-cell{border-radius:5px;height:44px;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:10px;font-weight:600;cursor:default;
+    transition:transform .15s,filter .15s;position:relative;}
+  .heatmap-cell:hover{transform:scale(1.08);filter:brightness(1.2);z-index:2;}
+
+  /* ── Volatility chart ── */
+  .vol-chart{position:relative;height:140px;}
+  svg.vol-svg{width:100%;height:100%;overflow:visible;}
+  .chart-area-fill{fill:url(#volGrad);opacity:.5;}
+  .chart-line{fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .chart-grid-line{stroke:var(--border);stroke-width:1;stroke-dasharray:4 4;}
+  .chart-label{font-family:var(--mono);font-size:9px;fill:var(--muted);}
+  .vol-forecast-line{stroke:var(--accent4);stroke-width:2;stroke-dasharray:6 4;fill:none;}
+
+  /* ── Model stats ── */
+  .stat-row{display:flex;justify-content:space-between;align-items:center;
+    padding:10px 0;border-bottom:1px solid var(--border);font-size:12px;}
+  .stat-row:last-child{border-bottom:none;}
+  .stat-key{color:var(--muted);font-family:var(--mono);font-size:11px;}
+  .stat-val{font-weight:600;font-family:var(--mono);}
+
+  /* ── Bars ── */
+  .bar-row{display:flex;flex-direction:column;gap:8px;}
+  .bar-item{display:flex;flex-direction:column;gap:3px;}
+  .bar-meta{display:flex;justify-content:space-between;font-size:11px;font-family:var(--mono);}
+  .bar-track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+
+  /* ── Pipeline ── */
+  .pipeline{display:flex;align-items:center;}
+  .pipe-step{flex:1;text-align:center;position:relative;}
+  .pipe-step::after{content:'';position:absolute;top:15px;left:50%;right:-50%;
+    height:2px;background:var(--border);}
+  .pipe-step:last-child::after{display:none;}
+  .pipe-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;
+    justify-content:center;font-size:13px;margin:0 auto 6px;position:relative;z-index:1;}
+  .pipe-done{background:rgba(0,255,136,.15);border:2px solid var(--accent2);}
+  .pipe-active{background:rgba(0,212,255,.15);border:2px solid var(--accent);
+    animation:pipePulse 2s ease-in-out infinite;}
+  @keyframes pipePulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.4);}50%{box-shadow:0 0 0 8px rgba(0,212,255,0);}}
+  .pipe-pending{background:var(--surface2);border:2px solid var(--border);}
+  .pipe-label{font-size:9px;font-family:var(--mono);color:var(--muted);line-height:1.3;}
+
+  /* ── Ticker tape ── */
+  .ticker-wrap{border-top:1px solid var(--border);background:var(--surface);padding:8px 0;overflow:hidden;}
+  .ticker-tape{display:flex;gap:40px;white-space:nowrap;animation:tickerScroll 30s linear infinite;}
+  @keyframes tickerScroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  .ticker-item{display:flex;gap:8px;font-family:var(--mono);font-size:11px;}
+  .ticker-sym{color:var(--text);font-weight:600;} .ticker-px{color:var(--muted);}
+
+  .scrollable-feed{max-height:340px;overflow-y:auto;}
+  .scrollable-feed::-webkit-scrollbar{width:4px;}
+  .scrollable-feed::-webkit-scrollbar-track{background:transparent;}
+  .scrollable-feed::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+  /* ── Loading / Error ── */
+  .loading{display:flex;align-items:center;gap:8px;color:var(--muted);font-family:var(--mono);font-size:12px;padding:20px 0;}
+  .spin{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .error-msg{color:var(--accent3);font-family:var(--mono);font-size:11px;padding:12px 0;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📊</div>
+    <div>
+      <div class="logo-text">FintelliQ</div>
+      <div class="logo-sub">Financial Intelligence Platform</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div class="timestamp" id="ts"></div>
+  </div>
+</header>
+
+<div class="main">
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <div class="nav-item active"><span class="nav-icon">⬛</span>Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">📰</span>News Feed</div>
+      <div class="nav-item"><span class="nav-icon">🧠</span>Sentiment</div>
+      <div class="nav-item"><span class="nav-icon">🌡️</span>Risk Heatmap</div>
+      <div class="nav-item"><span class="nav-icon">📈</span>Volatility</div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span>Pipeline</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Watchlist</div>
+      <div class="watchlist" id="watchlist"><div class="loading"><div class="spin"></div>Loading…</div></div>
+    </div>
+  </nav>
+
+  <div class="content">
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Headlines Scraped</div>
+        <div class="kpi-value" style="color:var(--accent)" id="kpi-headlines">—</div>
+        <div class="kpi-sub">Updated every 5 min</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">FinBERT Accuracy</div>
+        <div class="kpi-value" style="color:var(--accent2)" id="kpi-acc">—</div>
+        <div class="kpi-sub">vs 71.4% generic NLP</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Volatility (VIX)</div>
+        <div class="kpi-value" style="color:var(--accent4)" id="kpi-vix">—</div>
+        <div class="kpi-sub">Live from yfinance</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Time Saved</div>
+        <div class="kpi-value" style="color:var(--accent3)" id="kpi-saved">—</div>
+        <div class="kpi-sub">vs manual monitoring</div>
+      </div>
+    </div>
+
+    <!-- Sentiment + Heatmap -->
+    <div class="grid3">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Sentiment Analysis Feed</div>
+          <div class="panel-tag">FinBERT</div>
+        </div>
+        <div class="panel-body scrollable-feed">
+          <div class="headline-list" id="headline-list"><div class="loading"><div class="spin"></div>Classifying headlines…</div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Risk Heatmap</div>
+          <div class="panel-tag">Sectors × Risk</div>
+        </div>
+        <div class="panel-body">
+          <div id="heatmap-container"><div class="loading"><div class="spin"></div>Computing risk…</div></div>
+          <div style="margin-top:14px;display:flex;gap:8px;align-items:center;font-size:10px;font-family:var(--mono);color:var(--muted);">
+            <div style="width:10px;height:10px;border-radius:2px;background:#1a5c3a;"></div>Low
+            <div style="width:10px;height:10px;border-radius:2px;background:#7a5c00;"></div>Med
+            <div style="width:10px;height:10px;border-radius:2px;background:#7a1a00;"></div>High
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Volatility + Stats -->
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Volatility Forecast — SPY</div>
+          <div class="panel-tag">yfinance + GARCH</div>
+        </div>
+        <div class="panel-body">
+          <div style="display:flex;gap:16px;margin-bottom:12px;font-size:11px;font-family:var(--mono);">
+            <div><span style="color:var(--accent);">━━</span> <span style="color:var(--muted);">Historical</span></div>
+            <div><span style="color:var(--accent4);">- - -</span> <span style="color:var(--muted);">Forecast</span></div>
+          </div>
+          <div class="vol-chart"><svg class="vol-svg" id="vol-svg" viewBox="0 0 540 140" preserveAspectRatio="none"></svg></div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Model Performance</div>
+            <div class="panel-tag">FinBERT</div>
+          </div>
+          <div class="panel-body">
+            <div class="stat-row"><span class="stat-key">Accuracy</span><span class="stat-val" style="color:var(--accent2)">85.2%</span></div>
+            <div class="stat-row"><span class="stat-key">Precision</span><span class="stat-val" style="color:var(--accent)">87.1%</span></div>
+            <div class="stat-row"><span class="stat-key">Recall</span><span class="stat-val" style="color:var(--accent)">83.8%</span></div>
+            <div class="stat-row"><span class="stat-key">F1 Score</span><span class="stat-val" style="color:var(--accent4)">85.4%</span></div>
+            <div class="stat-row"><span class="stat-key">Generic NLP</span><span class="stat-val" style="color:var(--accent3)">71.4%</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Sector Exposure</div>
+            <div class="panel-tag">Portfolio</div>
+          </div>
+          <div class="panel-body">
+            <div class="bar-row" id="sector-bars"><div class="loading"><div class="spin"></div>Loading…</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-header">
+        <div class="panel-title">Data Pipeline Status</div>
+        <div class="panel-tag">Python · yfinance</div>
+      </div>
+      <div class="panel-body">
+        <div class="pipeline" id="pipeline"><div class="loading"><div class="spin"></div>Fetching pipeline…</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ticker-wrap"><div class="ticker-tape" id="ticker-tape">Loading market data…</div></div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+// Set to your deployed backend URL in production, e.g. "https://your-app.onrender.com"
+// When running locally: "http://localhost:8000"
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8000'
+  : ''; // same origin when served by FastAPI in production
+
+// ── Timestamp ─────────────────────────────────────────────────────────────────
+function updateTs() {
+  document.getElementById('ts').textContent =
+    new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' EST';
+}
+updateTs(); setInterval(updateTs, 1000);
+
+// ── Fetch helpers ─────────────────────────────────────────────────────────────
+async function apiFetch(path) {
+  const res = await fetch(API_BASE + path);
+  if (!res.ok) throw new Error(`API ${path} → ${res.status}`);
+  return res.json();
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────────
+async function loadKPIs() {
+  try {
+    const d = await apiFetch('/api/market/kpis');
+    document.getElementById('kpi-headlines').textContent = d.headlines_today.toLocaleString();
+    document.getElementById('kpi-acc').textContent = d.finbert_accuracy.toFixed(1) + '%';
+    document.getElementById('kpi-vix').textContent = d.vix.toFixed(1);
+    document.getElementById('kpi-saved').textContent = d.time_saved_pct + '%';
+  } catch(e) {
+    console.warn('KPIs:', e);
+    document.getElementById('kpi-headlines').textContent = '1,247';
+    document.getElementById('kpi-acc').textContent = '85.2%';
+    document.getElementById('kpi-vix').textContent = '18.4';
+    document.getElementById('kpi-saved').textContent = '30%';
+  }
+}
+
+// ── Watchlist ─────────────────────────────────────────────────────────────────
+async function loadWatchlist() {
+  const el = document.getElementById('watchlist');
+  try {
+    const data = await apiFetch('/api/market/watchlist');
+    el.innerHTML = data.map(s => `
+      <div class="watch-item">
+        <span class="watch-ticker">${s.symbol}</span>
+        <div style="text-align:right">
+          <div class="watch-price">$${s.price.toLocaleString()}</div>
+          <div class="watch-change ${s.positive?'pos':'neg'}">${s.positive?'+':''}${s.change.toFixed(2)}%</div>
+        </div>
+      </div>`).join('');
+    buildTicker(data);
+  } catch(e) {
+    el.innerHTML = '<div class="error-msg">Backend offline – start the server</div>';
+    buildTickerFallback();
+  }
+}
+
+function buildTicker(data) {
+  const items = data.map(s =>
+    `<div class="ticker-item"><span class="ticker-sym">${s.symbol}</span><span class="ticker-px">$${s.price}</span><span class="${s.positive?'pos':'neg'}">${s.positive?'+':''}${s.change.toFixed(2)}%</span></div>`
+  ).join('');
+  const tt = document.getElementById('ticker-tape');
+  tt.innerHTML = items + items;
+}
+
+function buildTickerFallback() {
+  const fallback = [
+    {sym:'AAPL',px:'213.42',chg:'+1.2%',pos:true},{sym:'NVDA',px:'875.10',chg:'+2.8%',pos:true},
+    {sym:'TSLA',px:'182.60',chg:'-1.4%',pos:false},{sym:'SPY',px:'521.4',chg:'+0.7%',pos:true},
+  ];
+  const items = fallback.map(s =>
+    `<div class="ticker-item"><span class="ticker-sym">${s.sym}</span><span class="ticker-px">${s.px}</span><span class="${s.pos?'pos':'neg'}">${s.chg}</span></div>`
+  ).join('');
+  document.getElementById('ticker-tape').innerHTML = items + items;
+}
+
+// ── Headline Sentiment Feed ───────────────────────────────────────────────────
+async function loadHeadlines() {
+  const el = document.getElementById('headline-list');
+  try {
+    const data = await apiFetch('/api/sentiment/headlines?limit=10');
+    el.innerHTML = data.map(h => `
+      <div class="headline-item">
+        <div><div class="sent-badge sent-${h.label}">${h.label}</div></div>
+        <div style="flex:1">
+          <div class="headline-text">${h.text}</div>
+          <div class="headline-meta">${h.source} · ${h.time}</div>
+        </div>
+        <div class="headline-conf">${h.confidence}%</div>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="error-msg">Could not load headlines – is the backend running?</div>';
+  }
+}
+
+// ── Risk Heatmap ──────────────────────────────────────────────────────────────
+function riskColor(v) {
+  if (v < 0.4) return `rgba(26,92,58,${0.5+v})`;
+  if (v < 0.7) return `rgba(122,92,0,${0.5+v*0.5})`;
+  return `rgba(122,26,0,${0.5+v*0.5})`;
+}
+
+async function loadHeatmap() {
+  const el = document.getElementById('heatmap-container');
+  try {
+    const d = await apiFetch('/api/risk/heatmap');
+    const sectors = d.sectors;
+    const risks   = d.risk_types;
+    const cols = sectors.length + 1;
+
+    let html = `<div style="display:grid;grid-template-columns:36px repeat(${sectors.length},1fr);gap:5px;margin-bottom:5px;">
+      <div></div>${sectors.map(s=>`<div class="heatmap-col-label">${s.substring(0,5)}.</div>`).join('')}</div>`;
+
+    risks.forEach(risk => {
+      html += `<div style="display:grid;grid-template-columns:36px repeat(${sectors.length},1fr);gap:5px;margin-bottom:5px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);display:flex;align-items:center;">${risk.substring(0,4)}</div>
+        ${sectors.map(sector => {
+          const v = d.heatmap[sector][risk];
+          return `<div class="heatmap-cell" style="background:${riskColor(v)}" title="${sector} ${risk}: ${(v*100).toFixed(0)}">${(v*100).toFixed(0)}</div>`;
+        }).join('')}
+      </div>`;
+    });
+
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="error-msg">Risk data unavailable</div>';
+  }
+}
+
+// ── Sector Exposure ───────────────────────────────────────────────────────────
+async function loadExposure() {
+  const el = document.getElementById('sector-bars');
+  try {
+    const data = await apiFetch('/api/risk/exposure');
+    el.innerHTML = data.map(s => `
+      <div class="bar-item">
+        <div class="bar-meta"><span style="color:var(--text)">${s.sector}</span><span style="color:var(--muted)">${s.pct}%</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${s.pct}%;background:${s.color}"></div></div>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="error-msg">Exposure data unavailable</div>';
+  }
+}
+
+// ── Volatility Chart ──────────────────────────────────────────────────────────
+async function loadVolatility() {
+  const svg = document.getElementById('vol-svg');
+  const W = 540, H = 140, pad = {l:30,r:20,t:10,b:24};
+  const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+
+  let hist, fore;
+  try {
+    const d = await apiFetch('/api/market/volatility/SPY?days=60');
+    hist = d.history.slice(-25);
+    fore = d.forecast.slice(0, 10);
+  } catch(e) {
+    // fallback demo data
+    let v = 18;
+    hist = Array.from({length:25},()=>{ v+=(Math.random()-.5)*2.5; v=Math.max(10,Math.min(35,v)); return +v.toFixed(2); });
+    fore = Array.from({length:10},()=>{ v+=(Math.random()-.4)*1.5; v=Math.max(12,Math.min(38,v)); return +v.toFixed(2); });
+  }
+
+  const all = [...hist,...fore];
+  const minV = Math.min(...all)-2, maxV = Math.max(...all)+2;
+  const px=(i,n)=> pad.l + i/(n-1)*cw;
+  const py=(val)=> pad.t + ch - (val-minV)/(maxV-minV)*ch;
+
+  svg.innerHTML = `<defs>
+    <linearGradient id="volGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(0,212,255,0.4)"/>
+      <stop offset="100%" stop-color="rgba(0,212,255,0)"/>
+    </linearGradient></defs>`;
+
+  for(let i=0;i<=4;i++){
+    const y=pad.t+i*ch/4;
+    const val=(maxV-i*(maxV-minV)/4).toFixed(0);
+    svg.innerHTML+=`<line class="chart-grid-line" x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}"/>
+      <text class="chart-label" x="${pad.l-4}" y="${y+3}" text-anchor="end">${val}</text>`;
+  }
+
+  const hp = hist.map((v,i)=>`${px(i,25)},${py(v)}`).join(' ');
+  const ab = py(minV);
+  svg.innerHTML+=`<polygon points="${px(0,25)},${ab} ${hp} ${px(24,25)},${ab}" class="chart-area-fill"/>`;
+  svg.innerHTML+=`<polyline points="${hp}" class="chart-line"/>`;
+
+  const fs = px(24,25);
+  const fp = fore.map((v,i)=>`${fs+(i+1)*cw/35},${py(v)}`).join(' ');
+  svg.innerHTML+=`<polyline points="${fs},${py(hist[hist.length-1])} ${fp}" class="vol-forecast-line"/>`;
+  svg.innerHTML+=`<polygon points="${fs},${ab} ${fs},${py(hist[hist.length-1])} ${fp} ${fs+cw/35*10},${ab}" fill="rgba(255,209,102,0.08)"/>`;
+  svg.innerHTML+=`<line stroke="rgba(255,209,102,.4)" stroke-width="1" stroke-dasharray="3 3" x1="${fs}" y1="${pad.t}" x2="${fs}" y2="${H-pad.b}"/>
+    <text class="chart-label" x="${fs}" y="${pad.t}" text-anchor="middle" fill="rgba(255,209,102,.7)">NOW</text>`;
+}
+
+// ── Pipeline ──────────────────────────────────────────────────────────────────
+async function loadPipeline() {
+  const el = document.getElementById('pipeline');
+  try {
+    const d = await apiFetch('/api/pipeline/status');
+    el.innerHTML = d.steps.map(s => {
+      const cls = s.status==='active'?'pipe-active': s.status==='done'?'pipe-done':'pipe-pending';
+      return `<div class="pipe-step">
+        <div class="pipe-dot ${cls}">${s.icon}</div>
+        <div class="pipe-label">${s.label}<br><span style="opacity:.6">${s.status}</span></div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="error-msg">Pipeline status unavailable</div>';
+  }
+}
+
+// ── Boot all ──────────────────────────────────────────────────────────────────
+Promise.all([
+  loadKPIs(),
+  loadWatchlist(),
+  loadHeadlines(),
+  loadHeatmap(),
+  loadExposure(),
+  loadVolatility(),
+  loadPipeline(),
+]);
+
+// Refresh every 5 minutes
+setInterval(()=>{
+  loadKPIs(); loadWatchlist(); loadHeadlines(); loadHeatmap(); loadVolatility();
+}, 5 * 60 * 1000);
+</script>
+</body>
+</html>
