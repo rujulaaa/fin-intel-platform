@@ -1,9 +1,3 @@
-"""
-Financial Intelligence Platform - Backend API
-FastAPI server that serves real market data, scraped headlines,
-FinBERT sentiment analysis, and volatility forecasts.
-"""
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
