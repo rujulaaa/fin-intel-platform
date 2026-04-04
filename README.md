@@ -28,7 +28,7 @@ fintelliq/
 
 ---
 
-## 🚀 Run Locally
+## Run Locally
 
 ### 1. Clone the repo
 ```bash
@@ -53,7 +53,7 @@ The FastAPI server automatically serves `frontend/index.html` at the root.
 
 ---
 
-## 🌐 Deploy Frontend to GitHub Pages (free, static)
+## Deploy Frontend to GitHub Pages (free, static)
 
 > The dashboard works standalone with fallback demo data when the backend is offline.
 
@@ -68,7 +68,7 @@ The FastAPI server automatically serves `frontend/index.html` at the root.
 
 ---
 
-## 🧠 Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
@@ -81,7 +81,7 @@ The FastAPI server automatically serves `frontend/index.html` at the root.
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
