@@ -1,4 +1,4 @@
-# FintelliQ
+# Finny Finance
 
 I built this as a full-stack financial intelligence platform that combines real-time market data, NLP-powered sentiment analysis, sector risk heatmaps, and volatility forecasting into one live dashboard.
 
@@ -27,7 +27,7 @@ Without either, the dashboard runs with smart demo data that randomizes slightly
 ## Project structure
 
 ```
-fintelliq/
+fin-intel-platform/
 ├── backend/
 │   ├── main.py                  # FastAPI entry point
 │   ├── __init__.py
@@ -52,7 +52,7 @@ fintelliq/
 
 ```bash
 git clone https://github.com/rujulaaa/fin-intel-platform.git
-cd fintelliq
+cd fin-intel-platform
 pip install -r requirements.txt
 uvicorn backend.main:app --reload --port 8000
 ```
