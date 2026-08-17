@@ -1,28 +1,33 @@
 # Finny Finance
 
-I built this as a full-stack financial intelligence platform that combines real-time market data, NLP-powered sentiment analysis, sector risk heatmaps, and volatility forecasting into one live dashboard.
+I built this as a full-stack financial intelligence platform that pulls together real-time market data, sentiment analysis on financial headlines, sector risk heatmaps, and volatility forecasting into one live dashboard.
 
-**Live dashboard:** [https://rujulaaa.github.io/fin-intel-platform](https://rujulaaa.github.io/fin-intel-platform)
+**Live dashboard:** [https://rujulaaa.github.io/fin-intel-platform/](https://rujulaaa.github.io/fin-intel-platform/)
 
 ## What it does
 
-- **Real-time watchlist** tracking 10 major stocks (AAPL, NVDA, TSLA, MSFT, AMZN, GOOGL, META, JPM, SPY, QQQ) with live prices and daily change
-- **Sentiment analysis feed** that classifies financial headlines as positive, negative, or neutral. The backend uses FinBERT (ProsusAI/finbert, fine-tuned to 85% accuracy). The static frontend runs a keyword-based NLP classifier in the browser for instant results
-- **Sector risk heatmap** mapping Technology, Financials, Energy, Healthcare, and Consumer sectors against Market, Liquidity, Credit, and FX risk
-- **Volatility forecasting** with historical realized volatility and a 10-day mean-reverting forecast model
-- **Sentiment distribution ring** showing the live POS/NEG/NEU breakdown
+The project has two layers: a live frontend dashboard deployed on GitHub Pages, and a Python backend that can be run locally or deployed separately for deeper ML-powered analysis.
+
+### Live dashboard (GitHub Pages)
+
+- **Real-time stock watchlist** tracking 10 major tickers (AAPL, NVDA, TSLA, MSFT, AMZN, GOOGL, META, JPM, SPY, QQQ) with live prices and daily change via Finnhub API
+- **Live financial news feed** pulling real headlines from Finnhub, classified as positive, negative, or neutral using a keyword-based NLP classifier running in the browser
+- **Sentiment distribution ring** showing the real-time POS/NEG/NEU breakdown across headlines
 - **Market movers panel** highlighting the top 5 biggest movers in the watchlist
-- **Data pipeline tracker** showing the status of each processing step
+- **Sector risk heatmap** mapping Technology, Financials, Energy, Healthcare, and Consumer sectors against Market, Liquidity, Credit, and FX risk types
+- **Volatility forecast chart** with historical realized volatility and a 10-day mean-reverting projection
+- **Sector exposure bars** showing portfolio allocation across sectors
+- **Data pipeline tracker** visualizing the end-to-end processing flow from scraping to dashboard
 
-## How the live data works
+### Backend (local / Render)
 
-The dashboard can pull live data two ways:
+When the FastAPI backend is running, it replaces the frontend data sources with:
 
-1. **Finnhub API (free):** Sign up at [finnhub.io](https://finnhub.io) for a free API key (takes 30 seconds, 60 calls/min). Paste it in the `FINNHUB_KEY` constant in `frontend/index.html`. This gives you real-time stock quotes and live financial news headlines, all fetched directly in the browser with no backend needed.
-
-2. **FastAPI backend:** When running locally or deployed on Render, the Python backend uses yfinance for market data and FinBERT for ML-powered sentiment classification.
-
-Without either, the dashboard runs with smart demo data that randomizes slightly on each load and auto-refreshes every 5 minutes.
+- **yfinance** for live market data and historical OHLCV
+- **FinBERT** (ProsusAI/finbert via HuggingFace Transformers) for ML-powered sentiment classification, fine-tuned to 85% accuracy
+- **requests + BeautifulSoup4** for scraping 1,000+ financial headlines from RSS feeds
+- **Real-time risk computation** using realized volatility from sector ETFs (XLK, XLF, XLE, XLV, XLY)
+- **Volatility forecasting** using historical log returns with a mean-reverting AR(1) model
 
 ## Project structure
 
@@ -61,14 +66,14 @@ Open [http://localhost:8000](http://localhost:8000) and the backend serves the d
 
 ## Deploying to GitHub Pages
 
-The repo has a GitHub Actions workflow that auto-deploys `frontend/` on every push to `main`.
+The repo includes a GitHub Actions workflow that auto-deploys `frontend/` on every push to `main`.
 
 1. Go to **Settings > Pages** in the repo
 2. Under **Source**, select **GitHub Actions**
 3. Push to `main`
-4. Dashboard goes live at `https://rujulaaa.github.io/fin-intel-platform/`
+4. Dashboard goes live at [https://rujulaaa.github.io/fin-intel-platform/](https://rujulaaa.github.io/fin-intel-platform/)
 
-For live stock data on GitHub Pages, add a free Finnhub API key (see "How the live data works" above).
+The frontend uses the Finnhub API (free, 60 calls/min) for real-time stock quotes and live news. The API key is set in the `FINNHUB_KEY` constant in `frontend/index.html`.
 
 ## Tech stack
 
